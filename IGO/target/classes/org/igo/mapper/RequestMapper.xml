@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="org.igo.mapper.RequestMapper">
+	
+	<insert id="insert">
+		insert into request(name, phone, addr, addr2, category, content, hopeDate, regDate)
+			 values (
+			 	#{name},#{phone},#{addr},#{addr2},#{category},#{content},#{hopeDate},now()
+			 )
+	</insert>
+	
+	<select id="getList" resultType="org.igo.domain.RequestVO">
+		<![CDATA[
+			select * from request order by rid desc
+		]]>
+	</select>
+	
+	<select id="login" resultType="String">
+		select ifnull(max(name),0) from request where name=#{name} and phone=#{phone}
+	</select>
+	
+	<select id="read" resultType="org.igo.domain.RequestVO">
+		<![CDATA[
+			select * from request where rid=#{rid}
+		]]>
+	</select>
+	
+	<update id="update">
+		update request
+		   set addr=#{addr},addr2=#{addr2},category=#{category},content=#{content},hopeDate=#{hopeDate},updateDate=now()
+		 where rid=#{rid}
+	</update>
+	
+	<update id="accept">
+		update request
+		   set fid=#{fid},acceptDate=now(),status=#{status}
+		 where rid=#{rid}
+	</update>
+	
+	<update	id="cancel">
+		update request set status='C' where rid=#{rid}
+	</update>
+	
+	<update	id="pay">
+		update request set status='P',score=#{score} where rid=#{rid}
+	</update>
+	
+	<select id="getListWithPaging" resultType="org.igo.domain.RequestVO">
+		<![CDATA[
+			select rownum_table.* from 
+				(SELECT @rownum:=@rownum+1 as rn, b.*
+				   FROM request b
+				  WHERE ]]>
+				  <if test="cri.type != '' &amp;&amp; cri.type != null">
+					  category = #{cri.type} and 
+				  </if>
+				  <![CDATA[ (@rownum:=0)=0 and @rownum < (#{cri.pageNum} * #{cri.amount}) and name=#{name} and phone=#{phone} order by rid desc) as rownum_table 
+			 where rn > (#{cri.pageNum}-1) * #{cri.amount}		
+			]]>
+			
+	</select>
+	
+	<!-- 게시물 전체 행수 구하기 10/11-->
+	<select id="getTotalCount" resultType="int">
+		<![CDATA[ select count(*) from request
+		where ]]>
+		<if test="cri.type != '' &amp;&amp; cri.type != null">
+		  category = #{cri.type} and 
+	 	</if>
+		<![CDATA[ name=#{name} and phone=#{phone} and rid > 0 ]]>
+	</select>
+
+</mapper>

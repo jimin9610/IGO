@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.3.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	<bean id="hikariConfig" class="com.zaxxer.hikari.HikariConfig">
+		<property name="driverClassName" value="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"/>
+		<property name="jdbcUrl" value="jdbc:log4jdbc:mysql://localhost:3306/igo?serverTimezone=Asia/Seoul"/>
+		<property name="username" value="igo"/>
+		<property name="password" value="igo1234"/>
+	</bean>
+	<!--
+			데이터베이스 연결 설정
+			destroy-method => 데이터 베이스 연결이 끝났을 경우 자동으로 close
+	-->
+	<bean id="dataSource"  class="com.zaxxer.hikari.HikariDataSource"  destroy-method="close">
+		<!-- constructor(생성자)-arg?
+				매개변수가 있는 생성자를 호출하여 초기화 -->
+		<constructor-arg ref="hikariConfig"/>
+	</bean>
+	<!-- 10/05 f -->
+	
+	<bean id="sqlSessionFactory"  class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource"  ref="dataSource"/>
+	</bean>
+	
+	<!-- mybatis-spring:scan => org.zerock.mapper 패키지 내에 선언된 mybatis관련 어노테이션을 모두 검색하여 처리-->
+	<mybatis-spring:scan base-package="org.igo.mapper"/>
+	
+	<context:component-scan base-package="org.igo.service"/>
+	
+<!-- 	
+	
+	<context:annotation-config></context:annotation-config>
+	
+	<context:component-scan base-package="org.bigdata.aop"/>
+	
+	<aop:aspectj-autoproxy/>
+	
+	
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	
+	
+	<tx:annotation-driven/>
+	
+	
+	
+	<context:component-scan base-package="org.bigdata.task"/>
+	
+
+	<task:annotation-driven/>
+	
+	 -->
+
+		
+</beans>

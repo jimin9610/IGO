@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="org.igo.mapper.FixerMapper">
+
+	<insert id="add">
+		insert into fixer(fname,fphone,password,profile,regDate)
+			 values (
+						#{fname},#{fphone},#{password},#{profile},now()
+					)
+	</insert>
+	
+	<select id="login" resultType="int">
+		select ifnull(max(fid),0) from fixer where fname=#{fname} and password=#{password}
+	</select>
+	
+	<select id="read" resultType="org.igo.domain.FixerVO">
+		select fid, fname, fphone, profile, regDate from fixer
+	</select>
+	
+	<select id="getList" resultType="org.igo.domain.RequestVO">
+		select * from request
+	</select>
+	
+	<select id="cat" resultType="org.igo.domain.DoneVO">
+		select distinct mainCode,largeCode,middleCode,cname,cprice,rid,r.fid as fid,fname,fphone from common c,request r,fixer f where c.largeCode = r.category and r.fid = f.fid and r.rid=#{rid};
+	</select>
+	
+	<update	id="accept">
+		update request set fid=#{fid}, acceptDate=now(), status='S' where rid=#{rid}
+	</update>
+	
+	<select id="score" resultType="double">
+		select ifnull(round(avg(score),1),0) from request where fid=#{fid}
+	</select>
+	
+	<select id="infoRead" resultType="org.igo.domain.FixerVO">
+		select * from fixer where fid=#{fid}
+	</select>
+	
+	<select id="done" resultType="org.igo.domain.DoneVO">
+		select flid,mainCode,largeCode,middleCode,cname,cprice,rid,f.fid as fid,fname,fphone from fixer f,fixList fl,common c
+		 where fl.Lcode = c.largeCode and fl.Mcode = c.middleCode and f.fid = fl.fid and rid=#{rid}
+		 order by flid desc;
+	</select>
+	
+	<update	id="updateFixer">
+		update fixer set fname=#{fname},password=#{password},fphone=#{fphone},profile=#{profile},updateDate=now() where fid=#{fid}
+	</update>
+	
+	<update	id="doneRequest">
+		update request set status='D' where rid=#{rid}
+	</update>
+	
+	<insert id="insert">
+		insert into fixList
+			 values (
+						null,#{rid},#{fid},#{Lcode},#{Mcode}
+					)
+	</insert>
+	
+	<delete id="delete">
+		delete from fixList where flid=#{flid}
+	</delete>
+	
+	<select id="getRListWithPaging" resultType="org.igo.domain.RequestVO">
+		<![CDATA[
+			select * from 
+				(SELECT @rownum:=@rownum+1 as rn, b.*
+				   FROM request b
+				  WHERE ]]>
+				  <if test="cri.type != '' &amp;&amp; cri.type != null">
+					  category = #{cri.type} and 
+				  </if>
+				  <![CDATA[ (@rownum:=0)=0 and @rownum < (#{cri.pageNum} * #{cri.amount}) order by rid desc) as rownum_table 
+			 where rn > (#{cri.pageNum}-1) * #{cri.amount}		
+			]]>
+			
+	</select>
+	
+	<select id="getRTotalCount" resultType="int">
+		<![CDATA[ 
+		select count(*) from request where ]]>
+				  <if test="cri.type != '' &amp;&amp; cri.type != null">
+					  category = #{cri.type} and 
+				  </if>
+				  <![CDATA[ rid > 0 ]]>
+	</select>
+	
+	<select id="getAListWithPaging" resultType="org.igo.domain.AskVO">
+		<![CDATA[
+			select * from 
+				(SELECT @rownum:=@rownum+1 as rn, b.*
+				   FROM ask b
+				  WHERE (@rownum:=0)=0 and @rownum < (#{cri.pageNum} * #{cri.amount}) order by aid desc) as rownum_table 
+			 where rn > (#{cri.pageNum}-1) * #{cri.amount}		
+			]]>
+			
+	</select>
+	
+	<select id="getATotalCount" resultType="int">
+		select count(*) from ask where aid > 0
+	</select>
+	
+	<select id="getFListWithPaging" resultType="org.igo.domain.RequestVO">
+		<![CDATA[
+			select * from 
+				(SELECT @rownum:=@rownum+1 as rn, b.*
+				   FROM request b
+				  WHERE ]]>
+				  <if test="cri.type != '' &amp;&amp; cri.type != null">
+					  category = #{cri.type} and 
+				  </if>
+				  <![CDATA[  (@rownum:=0)=0 and @rownum < (#{cri.pageNum} * #{cri.amount}) and fid=#{fid} order by rid desc) as rownum_table
+			 where rn > (#{cri.pageNum}-1) * #{cri.amount}		
+			]]>
+			
+	</select>
+	
+	<select id="getFTotalCount" resultType="int">
+		<![CDATA[ select count(*) from request
+					where  ]]>
+				  <if test="cri.type != '' &amp;&amp; cri.type != null">
+					  category = #{cri.type} and 
+				  </if>
+				  <![CDATA[ rid > 0 and fid=#{fid} ]]>
+	</select>
+	
+</mapper>

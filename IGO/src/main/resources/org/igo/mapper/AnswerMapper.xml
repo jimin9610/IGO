@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="org.igo.mapper.AnswerMapper">
+
+	<insert id="insert">
+		insert into answer(aid,fid,answer,regDate)
+			 values (
+			 	#{aid},#{fid},#{answer},now()
+			 )
+	</insert>
+	
+	<select id="read" resultType="org.igo.domain.AnswerVO">
+		<![CDATA[
+			select * from answer where aid=#{aid}
+		]]>
+	</select>
+	
+	<select id="fixerRead" resultType="org.igo.domain.FixerVO">
+		<![CDATA[
+			select * from fixer
+		]]>
+	</select>
+	
+	<update id="update">
+		update answer set answer=#{answer} where ansId=#{ansId}
+	</update>
+	
+	<update id="done">
+		update ask set status='Y',fid=#{fid} where aid=#{aid}
+	</update>
+
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="org.igo.mapper.AskMapper">
+
+	<insert id="insert">
+		insert into ask(name, phone, ask, regDate)
+			 values (
+			 	 #{name},#{phone},#{ask},now()
+			 )
+	</insert>
+	
+	<select id="getList" resultType="org.igo.domain.AskVO">
+		<![CDATA[
+			select * from ask order by aid desc
+		]]>
+	</select>
+	
+	<select id="login" resultType="String">
+		select ifnull(max(name),0) from ask where name=#{name} and phone=#{phone}
+	</select>
+	
+	<select id="read" resultType="org.igo.domain.AskVO">
+		<![CDATA[
+			select * from ask where aid=#{aid}
+		]]>
+	</select>
+	
+	<update id="update">
+		update ask
+		   set ask=#{ask},updateDate=now()
+		 where aid=#{aid}
+	</update>
+	
+	<select id="getListWithPaging" resultType="org.igo.domain.AskVO">
+		<![CDATA[
+			select * from 
+				(SELECT @rownum:=@rownum+1 as rn, b.*
+				   FROM ask b
+				  WHERE (@rownum:=0)=0 and name=#{name} and phone=#{phone} and @rownum < (#{cri.pageNum} * #{cri.amount}) order by aid desc) as rownum_table 
+			 where rn > (#{cri.pageNum}-1) * #{cri.amount}		
+			]]>
+			
+	</select>
+	
+	<!-- 게시물 전체 행수 구하기 10/11-->
+	<select id="getTotalCount" resultType="int">
+		select count(*) from ask where name=#{name} and phone=#{phone} and aid > 0
+	</select>
+
+</mapper>
